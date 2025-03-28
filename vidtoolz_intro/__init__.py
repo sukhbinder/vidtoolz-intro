@@ -53,6 +53,7 @@ def process_video_clips(input_data):
 def write_file(final_clip, output):
     # Write the output to a new file
     final_clip.write_videofile(output, codec="libx264", audio_codec="aac")
+    final_clip.close()
 
 
 def create_parser(subparser):
@@ -72,6 +73,7 @@ def create_parser(subparser):
     parser.add_argument(
         "-o", "--output", type=str, default=None, help="Output filename, default None"
     )
+    return parser
 
 
 class ViztoolzPlugin:
@@ -82,10 +84,13 @@ class ViztoolzPlugin:
     @vidtoolz.hookimpl
     def register_commands(self, subparser):
         self.parser = create_parser(subparser)
-        self.parser.set_defaults(func=self.hello)
+        self.parser.set_defaults(func=self.run)
 
     def run(self, args):
-        output = determine_output_path(args.input, args.output)
+        if isinstance(args.input, list):
+            output = determine_output_path(args.input[0], args.output)
+        else:
+            output = determine_output_path(args.input, args.output)
         if args.textfile:
             with open(args.textfile, "r") as fin:
                 data = fin.read()
