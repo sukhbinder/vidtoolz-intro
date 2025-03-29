@@ -73,7 +73,19 @@ def create_parser(subparser):
     parser.add_argument(
         "-o", "--output", type=str, default=None, help="Output filename, default None"
     )
+    parser.add_argument(
+        "-cd",
+        "--change-dir",
+        type=str,
+        default=None,
+        help="if Provided, go to this folder",
+    )
     return parser
+
+
+def write_textfile(textlist, outpath_tx):
+    with open(outpath_tx, "w") as fout:
+        fout.write("\n".join(textlist))
 
 
 class ViztoolzPlugin:
@@ -87,15 +99,22 @@ class ViztoolzPlugin:
         self.parser.set_defaults(func=self.run)
 
     def run(self, args):
+        if args.change_dir is not None:
+            os.chdir(args.change_dir)
+
         if isinstance(args.input, list):
             output = determine_output_path(args.input[0], args.output)
         else:
             output = determine_output_path(args.input, args.output)
+
         if args.textfile:
             with open(args.textfile, "r") as fin:
                 data = fin.read()
         elif args.input:
             data = args.input
+            text_output = f"{output}.txt"
+            print(data)
+            write_textfile(data, text_output)
 
         final_clip = process_video_clips(data)
         write_file(final_clip, output)

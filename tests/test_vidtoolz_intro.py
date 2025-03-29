@@ -22,6 +22,7 @@ def test_create_parser():
     assert result.textfile is None
     assert result.input == ["one.mp4,1,5", "two.mp4,2,5"]
     assert result.output is None
+    assert result.change_dir is None
 
 
 def test_plugin(capsys):
