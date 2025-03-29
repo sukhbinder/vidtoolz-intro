@@ -24,7 +24,29 @@ vidtoolz install vidtoolz-intro
 
 type ``vid intro --help`` to get help
 
+```bash
+usage: vid intro [-h] [-t TEXTFILE] [-i INPUT] [-o OUTPUT] [-cd CHANGE_DIR]
 
+Create intro video from a series of videos
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t TEXTFILE, --textfile TEXTFILE
+                        Text file containg. IMG102.mov,1,5 IMG200.mov,2,4
+  -i INPUT, --input INPUT
+                        Input like IMG102.mov,1,5
+  -o OUTPUT, --output OUTPUT
+                        Output filename, default None
+  -cd CHANGE_DIR, --change-dir CHANGE_DIR
+                        if Provided, go to this folder
+
+```
+## Example
+
+```bash
+ vid intro -i "small.mp4,1,3" -i "small.mp4,8,10" -cd /tmp
+```
+produces `small_intro.mp4` and `small_intro.mp4.txt` in the same folder as `small.mp4`
 
 ## Development
 

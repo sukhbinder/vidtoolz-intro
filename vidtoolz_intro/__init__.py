@@ -78,7 +78,7 @@ def create_parser(subparser):
         "--change-dir",
         type=str,
         default=None,
-        help="if Provided, go to this folder",
+        help="if Provided, go to this folder, before anything.",
     )
     return parser
 
