@@ -13,13 +13,13 @@ def test_create_parser():
 
     assert parser is not None
 
-    result = parser.parse_args(["-t" "hello.txt"])
-    assert result.textfile == "hello.txt"
+    result = parser.parse_args(["hello.txt"])
+    assert result.inputfile == "hello.txt"
     assert result.input is None
     assert result.output is None
 
     result = parser.parse_args(["-i" "one.mp4,1,5", "-i", "two.mp4,2,5"])
-    assert result.textfile is None
+    assert result.inputfile is None
     assert result.input == ["one.mp4,1,5", "two.mp4,2,5"]
     assert result.output is None
     assert result.change_dir is None

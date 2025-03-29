@@ -61,11 +61,11 @@ def create_parser(subparser):
         "intro", description="Create intro video from a series of videos"
     )
     parser.add_argument(
-        "-t",
-        "--textfile",
+        "inputfile",
         type=str,
         default=None,
         help="Text file containg. IMG102.mov,1,5\n IMG200.mov,2,4",
+        nargs="?",
     )
     parser.add_argument(
         "-i", "--input", type=str, action="append", help="Input like  IMG102.mov,1,5"
@@ -102,18 +102,17 @@ class ViztoolzPlugin:
         if args.change_dir is not None:
             os.chdir(args.change_dir)
 
-        if isinstance(args.input, list):
+        if args.input is not None:
             output = determine_output_path(args.input[0], args.output)
         else:
-            output = determine_output_path(args.input, args.output)
+            output = determine_output_path(args.inputfile, args.output)
 
-        if args.textfile:
-            with open(args.textfile, "r") as fin:
+        if args.inputfile:
+            with open(args.inputfile, "r") as fin:
                 data = fin.read()
         elif args.input:
             data = args.input
             text_output = f"{output}.txt"
-            print(data)
             write_textfile(data, text_output)
 
         final_clip = process_video_clips(data)
