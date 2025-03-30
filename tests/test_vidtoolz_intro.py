@@ -17,6 +17,7 @@ def test_create_parser():
     assert result.inputfile == "hello.txt"
     assert result.input is None
     assert result.output is None
+    assert result.use_moviepy is False
 
     result = parser.parse_args(["-i" "one.mp4,1,5", "-i", "two.mp4,2,5"])
     assert result.inputfile is None

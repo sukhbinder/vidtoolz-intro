@@ -1,6 +1,6 @@
 [project]
 name = "vidtoolz-intro"
-version = "0.0.1"
+version = "0.0.2"
 description = "Create intro video from a series of videos"
 readme = "README.md"
 authors = [{name = "Sukhbinder Singh"}]
@@ -10,6 +10,8 @@ classifiers = [
 ]
 dependencies = [
     "vidtoolz",
+    "vidtoolz-concat",
+    "vidtoolz-trim",
 ]
 
 [project.urls]

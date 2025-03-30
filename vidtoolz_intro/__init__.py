@@ -1,7 +1,9 @@
 import vidtoolz
 import os
 from moviepy import concatenate_videoclips, VideoFileClip
-
+import vidtoolz_trim as vt
+import vidtoolz_concat as vc
+import tempfile
 
 def determine_output_path(input_file, output_file):
     input_dir, input_filename = os.path.split(input_file)
@@ -14,8 +16,41 @@ def determine_output_path(input_file, output_file):
         return output_file
     else:
         return os.path.join(input_dir, f"{name}_intro.mp4")
+    
 
+def make_intro_with_ffmpeg(input_data, output, folder=None):
+    tmpdir = tempfile.gettempdir()
+    video_clips = []
+    if isinstance(input_data, str):
+        lines = input_data.strip().split("\n")
+    else:
+        lines = input_data
+        
+    # Parse the input data into a list of tuples (video_name, start_time, end_time)
+    for i, line in enumerate(lines,1):
+        parts = line.split(",")
+        if len(parts) != 3:
+            raise ValueError(f"Invalid input format: {line}")
 
+        if folder is not None:
+            video_name = os.path.join(folder,parts[0].strip())
+        else:
+            video_name = parts[0].strip()
+            
+        start_time = float(parts[1].strip())
+        end_time = float(parts[2].strip()) if parts[2].strip().isdigit() else -1
+        
+        outfilefile = os.path.join(tmpdir, f"{video_name}-{i}_trim.mp4")
+        outputfile=vt.trim_video(video_name, outfilefile, start_time, end_time)
+        video_clips.append(outfilefile)
+        
+    # now make video using concat
+    iret = vc.make_video(video_clips, output)
+    if iret == 0:
+        # remove temporary *_trim clips
+        for vid in video_clips:
+            os.remove(vid)
+    
 def process_video_clips(input_data):
 
     video_clips = []
@@ -26,18 +61,17 @@ def process_video_clips(input_data):
 
     # Parse the input data into a list of tuples (video_name, start_time, end_time)
     for line in lines:
-        print(line)
         parts = line.split(",")
         if len(parts) != 3:
             raise ValueError(f"Invalid input format: {line}")
 
         video_name = parts[0].strip()
         start_time = float(parts[1].strip())
-        end_time = float(parts[2].strip()) if parts[2].strip().isdigit() else None
+        end_time = float(parts[2].strip()) if parts[2].strip().isdigit() else -1
 
         # Load the video and clip it
         clip = VideoFileClip(video_name)
-        if end_time is not None:
+        if end_time != -1:
             clip = clip.subclipped(start_time, end_time)
         else:
             clip = clip.subclipped(start_time)
@@ -80,6 +114,13 @@ def create_parser(subparser):
         default=None,
         help="if Provided, go to this folder, before anything.",
     )
+    
+    parser.add_argument(
+        "-um",
+        "--use-moviepy",
+        action="store_true",
+        help="if Provided, use moviepy for intro else use ffmpeg.",
+    )
     return parser
 
 
@@ -99,8 +140,13 @@ class ViztoolzPlugin:
         self.parser.set_defaults(func=self.run)
 
     def run(self, args):
+        
+        if args.input is None and args.inputfile is None:
+            self.parser.error("Inputor input file must be specified.")
+        
         if args.change_dir is not None:
             os.chdir(args.change_dir)
+            folder = args.change_dir
 
         if args.input is not None:
             output = determine_output_path(args.input[0], args.output)
@@ -110,13 +156,17 @@ class ViztoolzPlugin:
         if args.inputfile:
             with open(args.inputfile, "r") as fin:
                 data = fin.read()
+            folder = os.path.dirname(args.inputfile)
         elif args.input:
             data = args.input
             text_output = f"{output}.txt"
             write_textfile(data, text_output)
 
-        final_clip = process_video_clips(data)
-        write_file(final_clip, output)
+        if args.use_moviepy:
+            final_clip = process_video_clips(data)
+            write_file(final_clip, output)
+        else:
+            _ = make_intro_with_ffmpeg(data, output, folder)
 
     def hello(self, args):
         # this routine will be called when "vidtoolz "intro is called."
