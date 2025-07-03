@@ -4,6 +4,7 @@ from moviepy import concatenate_videoclips, VideoFileClip
 import vidtoolz_trim as vt
 import vidtoolz_concat as vc
 import tempfile
+from moviepy.tools import convert_to_seconds
 
 
 def determine_output_path(input_file, output_file):
@@ -44,8 +45,8 @@ def make_intro_with_ffmpeg(input_data, output, folder=None):
         else:
             video_name = parts[0].strip()
 
-        start_time = float(parts[1].strip())
-        end_time = float(parts[2].strip()) if parts[2].strip().isdigit() else -1
+        start_time = convert_to_seconds(parts[1].strip())
+        end_time = convert_to_seconds(parts[2].strip())
 
         outfilefile = _trim_with_ffmpeg(i, video_name, start_time, end_time)
         video_clips.append(outfilefile)
@@ -74,8 +75,8 @@ def process_video_clips(input_data):
             raise ValueError(f"Invalid input format: {line}")
 
         video_name = parts[0].strip()
-        start_time = float(parts[1].strip())
-        end_time = float(parts[2].strip()) if parts[2].strip().isdigit() else -1
+        start_time = convert_to_seconds(parts[1].strip())
+        end_time = convert_to_seconds(parts[2].strip())
 
         # Load the video and clip it
         outfilefile = _trim_with_ffmpeg(i, video_name, start_time, end_time)
@@ -108,7 +109,11 @@ def create_parser(subparser):
         nargs="?",
     )
     parser.add_argument(
-        "-i", "--input", type=str, action="append", help="Input like  IMG102.mov,1,5"
+        "-i",
+        "--input",
+        type=str,
+        action="append",
+        help="Input like  IMG102.mov,1,5 or like IMGA.mov,1:06,1:20",
     )
     parser.add_argument(
         "-o", "--output", type=str, default=None, help="Output filename, default None"
