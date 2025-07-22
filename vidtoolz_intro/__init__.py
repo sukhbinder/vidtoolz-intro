@@ -1,6 +1,6 @@
 import vidtoolz
 import os
-from moviepy import concatenate_videoclips, VideoFileClip
+from moviepy import concatenate_videoclips, VideoFileClip, vfx
 import vidtoolz_trim as vt
 import vidtoolz_concat as vc
 import tempfile
@@ -83,6 +83,8 @@ def process_video_clips(input_data):
         vids.append(outfilefile)
         clip = VideoFileClip(outfilefile)
 
+        # Add 0.5 sec fade-out effect
+        clip = clip.with_effects([vfx.FadeIn(0.5), vfx.FadeOut(0.5)])
         video_clips.append(clip)
 
     # Concatenate all clips together
