@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 import os
 import pytest
 from unittest.mock import patch, MagicMock
+from pathlib import Path
 
 
 def test_create_parser():
@@ -63,3 +64,83 @@ def test_determine_output_path():
     output_file = "final.mp4"
     expected = "/path/to/input/final.mp4"
     assert w.determine_output_path(input_file, output_file) == expected
+
+
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
+
+
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
+def test_realcase_intro(tmpdir):
+    outfile = tmpdir / "test_intro.mp4"
+    testdata = Path(__file__).parent / "test_data"
+    txtfile = testdata / "orderfiles.txt"
+    subparser = ArgumentParser().add_subparsers()
+    parser = w.create_parser(subparser)
+
+    argv = [str(txtfile), "-o", str(outfile)]
+    args = parser.parse_args(argv)
+    args.func = None
+    w.intro_plugin.run(args)
+    assert outfile.exists()
+
+
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
+def test_realcase_intro_moviepy(tmpdir):
+    outfile = tmpdir / "test_intro_moviepy.mp4"
+    testdata = Path(__file__).parent / "test_data"
+    txtfile = testdata / "orderfiles.txt"
+    subparser = ArgumentParser().add_subparsers()
+    parser = w.create_parser(subparser)
+
+    argv = [str(txtfile), "-o", str(outfile), "-um", "-cd", str(testdata)]
+    args = parser.parse_args(argv)
+    args.func = None
+    w.intro_plugin.run(args)
+    assert outfile.exists()
+
+
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
+def test_realcase_intro_moviepy_using_i(tmpdir):
+    outfile = tmpdir / "test_intro_moviepy_i.mp4"
+    testdata = Path(__file__).parent / "test_data"
+    subparser = ArgumentParser().add_subparsers()
+    parser = w.create_parser(subparser)
+
+    argv = [
+        "-i",
+        "IMG_5654.MOV,0,1",
+        "-i",
+        "5052.mp4,1,2",
+        "-o",
+        str(outfile),
+        "-um",
+        "-cd",
+        str(testdata),
+    ]
+    args = parser.parse_args(argv)
+    args.func = None
+    w.intro_plugin.run(args)
+    assert outfile.exists()
+
+
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
+def test_realcase_intro_using_i(tmpdir):
+    outfile = tmpdir / "test_intro_i.mp4"
+    subparser = ArgumentParser().add_subparsers()
+    parser = w.create_parser(subparser)
+    testdata = Path(__file__).parent / "test_data"
+
+    argv = [
+        "-i",
+        "IMG_5654.MOV,0,1",
+        "-i",
+        "5052.mp4,1,2",
+        "-o",
+        str(outfile),
+        "-cd",
+        str(testdata),
+    ]
+    args = parser.parse_args(argv)
+    args.func = None
+    w.intro_plugin.run(args)
+    assert outfile.exists()

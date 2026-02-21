@@ -60,7 +60,6 @@ def make_intro_with_ffmpeg(input_data, output, folder=None):
 
 
 def process_video_clips(input_data):
-
     video_clips = []
     if isinstance(input_data, str):
         lines = input_data.strip().split("\n")
@@ -153,13 +152,12 @@ class ViztoolzPlugin:
         self.parser.set_defaults(func=self.run)
 
     def run(self, args):
-
         if args.input is None and args.inputfile is None:
-            self.parser.error("Inputor input file must be specified.")
+            self.parser.error("Input or inputfile must be specified.")
 
+        folder = args.change_dir
         if args.change_dir is not None:
             os.chdir(args.change_dir)
-            folder = args.change_dir
 
         if args.input is not None:
             output = determine_output_path(args.input[0], args.output)
